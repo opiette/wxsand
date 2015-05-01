@@ -1,0 +1,206 @@
+#wxSand: Owen Piette's Falling Sand Game
+#Version 4.4, File subversion 2
+#element element r g b gravity slip density conductivity visible
+#self probabilityOfChanging element [probabilityOfChangingIntoThisElement element] [...]
+#hotself tempAtWhichThisElementSelfProbabilityStartsToIncreaseTo100 element
+#hotcolor element r g b
+#neighbor probabilityOfReacting element1 element2 [probabilityOfChangingIntoTheseElements element1 element2] [...]
+#hotneighbor tempAtWhichThisElementSelfProbabilityStartsToIncreaseTo100 element1 element2
+#explosion neighbor1 neighbor2 xspeed<255 yspeed<255
+#pexplosion neighbor1 neighbor2 diameter element
+
+hotcolor all 255 255 255
+#self 0.001 all 1.0 Empty
+
+
+group   Waters Water  Steam  Saltwater  Spout
+group	Fires	Fire	Torch	TNT	Ember	FallingEmber
+sources Sand    Water  Salt   Oil
+
+#Erases.
+element	Empty	0	0	0	0.000000	1.000000	0.000000	0.000000	1
+
+#Move randomly on the screen
+element flies 34 52 23 0 0 1 0 1
+neighbor 1.0 flies Empty 1.0 Empty flies
+
+#Eraser element.
+element	Drain	10	10	10	0.000000	1.000000	0.000000	0.000000	1
+neighbor 1.0	Drain	all	1.0	Drain	Empty
+neighbor 0.0	Drain	Drain	1.0	Drain	Drain
+
+#A solid element which reacts with nothing.
+element	Wall	128	128	128	0.000000	0.000000	1.000000	0.500000	1
+#hotcolor  Wall  255     0     0
+
+#Does nothing. Useful for explosion aftermaths
+element	Dust	128	128	128	0.900000	0.000000	1.000000	0.500000	1
+
+#Burns other elements. Source of energy.
+element	Fire	247	63	63	-1.000000	1.000000	0.000000	1.100000	1
+self	0.050000	Fire	1.0000	Empty	
+hotcolor Fire   255    63     63
+neighbor 0.9	Fire	Water	1.0	Empty		Steam
+neighbor 0.75	Fire	Oil	1.0	Fire		Fire
+neighbor 1.0	Fire	Plant	1.0	Fire		Fire
+neighbor 0.005	Fire	Cera	1.0	MoltenCera	Ember
+neighbor 0.9	Fire	TNT	1.0	ExplodingTNT	Fire
+explosion	Fire	Oil	10	10
+explosion	Fire	TNT	100	100
+
+#Explodes
+element	TNT	50	50	50	0.000000	0.000000	1.000000	0.000000	1
+
+#Explodes
+element	ExplodingTNT	100	50	50	0.900000	1.000000	1.000000	0.000000	0
+self	0.02000	ExplodingTNT	1.0000	Fire
+neighbor 0.9	ExplodingTNT	TNT	1.0	ExplodingTNT	ExplodingTNT
+neighbor 1.0	ExplodingTNT	Wall	1.0	ExplodingTNT	Dust
+explosion	ExplodingTNT	TNT	100	100
+
+#Dissolves other elements. Turns to steam when heated.
+element	Water	32	32	255	0.700000	1.000000	0.500000	0.400000	1
+hotcolor Water  200     200     255
+self    0.001     Water   1.0     Steam
+hotself 50     Water
+
+#Grows in water.
+element	Plant	32	204	32	0.000000	0.000000	1.000000	0.000000	1
+neighbor 0.2	Plant	Water	1.0	Plant	Plant
+
+#Inert.
+element	Sand	238	204	128	0.900000	0.500000	0.900000	0.000000	1
+
+#Source of water.
+element	Spout	10	100	10	0.000000	0.000000	1.000000	0.000000	1
+neighbor 0.75	Spout	Empty	1.0	Spout		Water
+neighbor 0.5	Spout	Sand	1.0	Empty		Empty
+
+#Wax. Melts.
+element	Cera	238	221	204	0.000000	0.000000	1.000000	0.000000	1
+
+#Destroys almost everything.
+element	???	231	7	231	0.000000	1.000000	1.000000	0.000000	1
+self	0.100000	???	1.0000	Leftover???
+neighbor 1.0	???	Empty	1.0	???	???
+neighbor 1.0	???	Wall	1.0	???	???
+neighbor 1.0	???	Fire	1.0	???	???
+neighbor 1.0	???	Water	1.0	???	???
+neighbor 1.0	???	Sand	1.0	???	???
+neighbor 1.0	???	Spout	1.0	???	???
+neighbor 1.0	???	Cera	1.0	???	???
+neighbor 1.0	???	Oil	1.0	???	???
+neighbor 1.0	???	Salt	1.0	???	???
+neighbor 1.0	???	Ember	1.0	???	???
+neighbor 1.0	???	MoltenCera	1.0	???	???
+neighbor 1.0	???	Steam	1.0	???	???
+neighbor 1.0	???	Saltwater	1.0	???	???
+neighbor 1.0	???	Torch	1.0	???	???
+neighbor 0.2	???	Leftover???	1.0	Leftover???	Leftover???
+
+#Burns.
+element	Oil	128	64	64	0.700000	1.000000	0.200000	0.000000	1
+
+#Soluable in water.
+element	Salt	255	255	255	0.900000	0.400000	0.900000	0.000000	1
+
+#Burns for a little while.
+element	Ember	200	50	50	0.000000	0.200000	1.000000	0.000000	1
+self	0.002000	Ember	1.0000	Fire
+neighbor 0.2		Ember	Empty	1.0	Ember	Fire
+neighbor 0.9		Ember	Water	1.0	Empty	Steam
+neighbor 0.75		Ember	Oil	1.0	Ember	Fire
+neighbor 1.0		Ember	Plant	1.0	Ember	Fire
+neighbor 0.005		Ember	Cera	1.0	MoltenCera	Ember
+
+#Burns for a little while.
+element	FallingEmber	200	50	50	1.000000	0.200000	1.000000	0.000000	1
+self	0.002000	FallingEmber	1.0000	Fire
+neighbor 0.2		FallingEmber	Empty	1.0	FallingEmber	Fire
+neighbor 0.9		FallingEmber	Water	1.0	Empty	Steam
+neighbor 1.0		FallingEmber	Oil	1.0	FallingEmber	FallingEmber
+neighbor 1.0		FallingEmber	Plant	1.0	FallingEmber	Fire
+neighbor 0.005		FallingEmber	Cera	1.0	MoltenCera	Ember
+
+#Flowing cera. Will harden eventually.
+element	MoltenCera	255	220	200	0.800000	1.000000	1.000000	0.000000	0
+neighbor 0.01	MoltenCera	Wall	1.0	Cera	Wall
+neighbor 0.01	MoltenCera	Water	1.0	Cera	Water
+neighbor 0.01	MoltenCera	Sand	1.0	Cera	Sand
+neighbor 0.01	MoltenCera	Spout	1.0	Cera	Spout
+neighbor 0.01	MoltenCera	Cera	1.0	Cera	Cera
+neighbor 0.01	MoltenCera	Oil	1.0	Cera	Oil
+neighbor 0.01	MoltenCera	Salt	1.0	Cera	Salt
+neighbor 0.01	MoltenCera	Saltwater	1.0	Cera	Saltwater
+
+#Will eventually condense.
+element	Steam	85	85	255	-1.000000	1.000000	0.010000	0.000000	1
+self	0.001000	Steam	1.0000	Water
+
+#Salt will slowly come out of solution.
+element	Saltwater	0	0	150	0.700000	0.000000	0.500000	0.600000	1
+self	0.00001	Saltwater	0.5	Water	0.5	Salt
+neighbor 0.004	Water	Salt	1.0	Saltwater	Saltwater
+neighbor 0.001	Saltwater	Saltwater	1.0	Salt	Steam
+neighbor 0.04	Saltwater	Water	1.0	Water	Saltwater
+neighbor 0.9	Saltwater	Fire	1.0	Salt	Steam
+hotneighbor   50	Saltwater	Saltwater
+
+#Continuous fire.
+element	Torch	100	0	0	0.000000	1.000000	1.000000	1.000000	1
+neighbor 0.2	Torch	Empty	1.0	Torch	Fire
+neighbor 0.2	Torch	Water	1.0	Torch	Steam
+neighbor 0.2	Torch	Saltwater	0.5	Torch	Steam	0.5	Torch	Salt
+neighbor 0.2	Torch	Oil	1.0	Torch	Fire
+neighbor 0.2	Torch	Plant	1.0	Torch	Fire
+neighbor 0.2	Torch	Cera	1.0	Torch	MoltenCera
+
+#A helper element.
+element	Leftover???	200	0	0	0.000000	0.000000	1.000000	0.000000	0
+self	0.005000	Leftover???	1.0000	Empty	
+
+self 0.000001 Plant 1.0 Flower
+
+element FlowerPetalUncolored 255	255	255	0.000000	0.000000	1.000000	0.000000	0
+self 0.0001 FlowerPetalUncolored 0.33 FlowerPetalRed 0.33 FlowerPetalGreen 0.34 FlowerPetalBlue
+element FlowerPetalRed 208	108	108	0.000000	0.000000	1.000000	0.000000	0
+neighbor 1.0 FlowerPetalUncolored FlowerPetalRed 1.0 FlowerPetalRed FlowerPetalRed
+neighbor 1.0	Fire	FlowerPetalRed	1.0	Fire		Fire
+
+element FlowerPetalGreen 108	208	108	0.000000	0.000000	1.000000	0.000000	0
+neighbor 1.0 FlowerPetalUncolored FlowerPetalGreen 1.0 FlowerPetalGreen FlowerPetalGreen
+neighbor 1.0	Fire	FlowerPetalGreen	1.0	Fire		Fire
+
+element FlowerPetalBlue 108	108	208	0.000000	0.000000	1.000000	0.000000	0
+neighbor 1.0 FlowerPetalUncolored FlowerPetalBlue 1.0 FlowerPetalBlue FlowerPetalBlue
+neighbor 1.0	Fire	FlowerPetalBlue	1.0	Fire		Fire
+
+element FlowerBorderUncolored 255	255	255	0.000000	0.000000	1.000000	0.000000	0
+neighbor 1.0	Fire	FlowerBorderUncolored	1.0	Fire		Fire
+
+#A pretty flower
+item Flower 1
+FlowerBorderUncolored . FlowerPetalUncolored +
+"      .......... ....    ",
+"     ..++++++.........   ",
+"     ...+++++++..+++...  ",
+"      ...++++++..++++... ",
+"  ........+++++..+++++.. ",
+"  ..++++..++++++++++++.. ",
+"  .+++++++++++++++++...  ",
+"  .++++++++@@@+++++...   ",
+"  .++++++@@@@@@++....    ",
+"  .....++@@@@@@++...     ",
+"   .....++@@@@@++.....   ",
+"  ...++++++@@+++++++.... ",
+"  ..++++++++++++++++++...",
+"  ..+++++++++++++++++++..",
+"  ..+++++++++++++++++++..",
+"  ..+++.+++++++..++++++..",
+"  ......+++++++....+.....",
+"   .....++++++.. ....... ",
+"       ..++++...         ",
+"       ........          ",
+"         ....            ",
+
+
